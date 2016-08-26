@@ -1,10 +1,13 @@
 package com.example.jcliu.sqliteex3;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     ListView lv;
     EditText etPhone, etEmail;
     ImageView iv;
+    Uri imageUri;
     Button btInsert, btUpdate, btDelete;
     SimpleCursorAdapter adapter;
     SQLiteDatabase db;
@@ -68,6 +72,34 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         lv.setAdapter(adapter);
         lv.setOnItemClickListener(this);
         requery();
+    }
+
+    public void fromGallery(View v){
+        Intent it = new Intent(Intent.ACTION_GET_CONTENT);
+        it.setType("image/*");
+        startActivityForResult(it, 100); //requestCode = 100
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == Activity.RESULT_OK){
+            imageUri = data.getData();
+
+            // getPath() does not give me real image path
+            Log.d("Hotlist", imageUri.getPath().toString());
+            Log.d("Hotlist", "ImageView height = " + Integer.toString(iv.getHeight()));
+            // resize image
+            BitmapFactory.Options option = new BitmapFactory.Options();
+            option.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(imageUri.getPath(), option);
+            Log.d("Hotlist", "image height = " + Integer.toString(option.outWidth));
+            Bitmap bmp = BitmapFactory.decodeFile(imageUri.getPath());
+            Log.d("Hotlist", "decode bmp");
+            //iiv.setImageBitmap(bmp);
+
+            iv.setImageURI(imageUri);
+        }
     }
 
     public void call(View v){

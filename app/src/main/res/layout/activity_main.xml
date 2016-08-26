@@ -34,9 +34,12 @@
 
         <ImageView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/imageView"
-            android:layout_weight="0.8" />
+            android:layout_weight="0.8"
+            android:onClick="fromGallery"
+            android:visibility="visible"
+            android:src="@android:drawable/ic_menu_gallery" />
 
     </LinearLayout>
 
