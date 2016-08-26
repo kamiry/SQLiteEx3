@@ -98,39 +98,44 @@
         android:weightSum="1">
 
         <Button
-            android:layout_width="60dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="新增"
             android:id="@+id/button"
-            android:onClick="InsertOrUpdate" />
+            android:onClick="InsertOrUpdate"
+            android:layout_weight="0.20" />
 
         <Button
-            android:layout_width="59dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="修改"
             android:id="@+id/button2"
-            android:onClick="InsertOrUpdate" />
+            android:onClick="InsertOrUpdate"
+            android:layout_weight="0.20" />
 
         <Button
-            android:layout_width="70dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="刪除"
             android:id="@+id/button3"
-            android:onClick="delete" />
+            android:onClick="delete"
+            android:layout_weight="0.20" />
 
         <ImageButton
-            android:layout_width="66dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/imageButton"
             android:src="@android:drawable/ic_menu_call"
-            android:onClick="call" />
+            android:onClick="call"
+            android:layout_weight="0.20" />
 
         <ImageButton
-            android:layout_width="64dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:id="@+id/imageButton2"
             android:src="@android:drawable/sym_action_email"
-            android:onClick="mail" />
+            android:onClick="mail"
+            android:layout_weight="0.20" />
 
     </LinearLayout>
 </LinearLayout>
