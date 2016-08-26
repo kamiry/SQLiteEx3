@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
@@ -21,7 +22,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     static final String DB_NAME = "HotlineDB";
     static final String TB_NAME = "hostlist";
     ListView lv;
-    EditText etName, etPhone, etEmail;
+    EditText etPhone, etEmail;
+    ImageView iv;
     Button btInsert, btUpdate, btDelete;
     SimpleCursorAdapter adapter;
     SQLiteDatabase db;
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
         //
         lv = (ListView)findViewById(R.id.listView);
-        etName = (EditText)findViewById(R.id.editText);
+        iv = (ImageView) findViewById(R.id.imageView);
         etPhone = (EditText)findViewById(R.id.editText2);
         etEmail = (EditText)findViewById(R.id.editText3);
         btInsert = (Button)findViewById(R.id.button);
@@ -96,17 +98,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void InsertOrUpdate(View v){
-        String nameStr = etName.getText().toString().trim();
+        //String nameStr = etName.getText().toString().trim();
         String phoneStr = etPhone.getText().toString().trim();
         String emailStr = etEmail.getText().toString().trim();
 
-        if(nameStr.length() == 0 || phoneStr.length() == 0 || emailStr.length() == 0)
+        if(phoneStr.length() == 0 || emailStr.length() == 0)
             return;
         if(v.getId() == R.id.button2)
-            update(nameStr, phoneStr, emailStr, cur.getInt(0));
+            //update(nameStr, phoneStr, emailStr, cur.getInt(0));
+            Log.d("Hotlist", "update button");
         else {
-            addData(nameStr, phoneStr, emailStr);
-            Log.d("Hotlist", "insert data");
+            //addData(nameStr, phoneStr, emailStr);
+            Log.d("Hotlist", "insert button");
         }
 
         requery();
@@ -135,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         cur.moveToPosition(position);
-        etName.setText(cur.getString(cur.getColumnIndex(FROM[0])));
+        //etName.setText(cur.getString(cur.getColumnIndex(FROM[0])));
         etPhone.setText(cur.getString(cur.getColumnIndex(FROM[1])));
         etEmail.setText(cur.getString(cur.getColumnIndex(FROM[2])));
         btUpdate.setEnabled(true);
