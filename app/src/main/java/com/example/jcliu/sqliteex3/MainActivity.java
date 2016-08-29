@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     EditText etPhone, etEmail;
     ImageView iv;
     Uri imageUri;
+    String ivStr;
     Button btInsert, btUpdate, btDelete;
     SimpleCursorAdapter adapter;
     SQLiteDatabase db;
@@ -58,8 +59,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         // insert data if empty
         cur = db.rawQuery("SELECT * FROM " + TB_NAME, null);
         if (cur.getCount() == 0){
-            addData("暨南大學", "049-2910960", "www@ncnu.edu.tw");
-            addData("暨南大學資工系", "049-2910960", "www@csie.ncnu.edu.tw");
+            //addData("暨南大學", "049-2910960", "www@ncnu.edu.tw");
+            //addData("暨南大學資工系", "049-2910960", "www@csie.ncnu.edu.tw");
             Log.d("Hotlist", "insert data to empty table");
         }
         else
@@ -83,21 +84,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode == Activity.RESULT_OK){
+        if(resultCode == Activity.RESULT_OK && requestCode == 100){
             imageUri = data.getData();
+            Log.d("Hotlist", "URI string : " + imageUri.toString());
 
             // getPath() does not give me real image path
-            Log.d("Hotlist", imageUri.getPath().toString());
-            Log.d("Hotlist", "ImageView height = " + Integer.toString(iv.getHeight()));
-            // resize image
-            BitmapFactory.Options option = new BitmapFactory.Options();
-            option.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(imageUri.getPath(), option);
-            Log.d("Hotlist", "image height = " + Integer.toString(option.outWidth));
-            Bitmap bmp = BitmapFactory.decodeFile(imageUri.getPath());
-            Log.d("Hotlist", "decode bmp");
-            //iiv.setImageBitmap(bmp);
-
+            /*
+                        Log.d("Hotlist", imageUri.getPath().toString());
+                        Log.d("Hotlist", "ImageView height = " + Integer.toString(iv.getHeight()));
+                        // resize image
+                        BitmapFactory.Options option = new BitmapFactory.Options();
+                        option.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(imageUri.getPath(), option);
+                        Log.d("Hotlist", "image height = " + Integer.toString(option.outWidth));
+                        Bitmap bmp = BitmapFactory.decodeFile(imageUri.getPath());
+                        Log.d("Hotlist", "decode bmp");
+                        //iiv.setImageBitmap(bmp);
+                        */
+            ivStr = imageUri.toString();
             iv.setImageURI(imageUri);
         }
     }
@@ -131,16 +135,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void InsertOrUpdate(View v){
         //String nameStr = etName.getText().toString().trim();
+        String nameStr = ivStr;
         String phoneStr = etPhone.getText().toString().trim();
         String emailStr = etEmail.getText().toString().trim();
 
-        if(phoneStr.length() == 0 || emailStr.length() == 0)
+        if(ivStr.length() ==0 || phoneStr.length() == 0 || emailStr.length() == 0)
             return;
-        if(v.getId() == R.id.button2)
-            //update(nameStr, phoneStr, emailStr, cur.getInt(0));
+        if(v.getId() == R.id.button2) {
+            update(nameStr, phoneStr, emailStr, cur.getInt(0));
             Log.d("Hotlist", "update button");
+        }
         else {
-            //addData(nameStr, phoneStr, emailStr);
+            addData(nameStr, phoneStr, emailStr);
             Log.d("Hotlist", "insert button");
         }
 
@@ -171,6 +177,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         cur.moveToPosition(position);
         //etName.setText(cur.getString(cur.getColumnIndex(FROM[0])));
+        ivStr = cur.getString(cur.getColumnIndex(FROM[0]));
+        iv.setImageURI(Uri.parse(ivStr));
         etPhone.setText(cur.getString(cur.getColumnIndex(FROM[1])));
         etEmail.setText(cur.getString(cur.getColumnIndex(FROM[2])));
         btUpdate.setEnabled(true);
