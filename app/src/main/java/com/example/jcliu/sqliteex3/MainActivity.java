@@ -9,6 +9,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +22,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
 
@@ -75,6 +82,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         requery();
     }
 
+    public String getRealPathFromURI (Uri contentUri) {
+        String yourRealPath = null;
+        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(contentUri, filePathColumn, null, null, null);
+        if(cursor.moveToFirst()){
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            Log.d("Hotlist", "filePathColumn= " + filePathColumn[0]);
+            yourRealPath = cursor.getString(columnIndex);
+            Log.d("Hotlist", "realpath = " + yourRealPath);
+        }
+        else
+            Log.d("Hotlist", "MediaStore cursor empty");
+        cursor.close();
+        return yourRealPath;
+    }
+
+
+
     public void fromGallery(View v){
         Intent it = new Intent(Intent.ACTION_GET_CONTENT);
         it.setType("image/*");
@@ -87,7 +112,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(resultCode == Activity.RESULT_OK && requestCode == 100){
             imageUri = data.getData();
             Log.d("Hotlist", "URI string : " + imageUri.toString());
-
+            String tmpStr;
+            tmpStr = imageUri.getPath();
+            Log.d("Hotlist", "URI getpath() = " + tmpStr);
+            //tmpStr = getRealPathFromURI(imageUri);
+            tmpStr = getRealPathFromURI(imageUri);
+            Log.d("Hotlist", "Real path = " + tmpStr);
             // getPath() does not give me real image path
             /*
                         Log.d("Hotlist", imageUri.getPath().toString());
@@ -102,7 +132,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         //iiv.setImageBitmap(bmp);
                         */
             ivStr = imageUri.toString();
+            //iv.setImageURI(Uri.parse(ivStr));
             iv.setImageURI(imageUri);
+
         }
     }
 
@@ -178,10 +210,56 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         cur.moveToPosition(position);
         //etName.setText(cur.getString(cur.getColumnIndex(FROM[0])));
         ivStr = cur.getString(cur.getColumnIndex(FROM[0]));
-        iv.setImageURI(Uri.parse(ivStr));
+        Log.d("Hotlist", "content = " + ivStr);
+        imageUri = Uri.parse(ivStr);
+        iv.setImageURI(null); // not showing next time without this magic line
+        iv.setImageURI(imageUri);
+        /*Bitmap bitmap = null;
+        try {
+            bitmap = getThumbnail(imageUri);
+            iv.setImageBitmap(bitmap);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        */
+
+
         etPhone.setText(cur.getString(cur.getColumnIndex(FROM[1])));
         etEmail.setText(cur.getString(cur.getColumnIndex(FROM[2])));
         btUpdate.setEnabled(true);
         btDelete.setEnabled(true);
+    }
+
+    public Bitmap getThumbnail(Uri uri) throws FileNotFoundException, IOException{
+        int THUMBNAIL_SIZE=32;
+        InputStream input = this.getContentResolver().openInputStream(uri);
+
+        BitmapFactory.Options onlyBoundsOptions = new BitmapFactory.Options();
+        onlyBoundsOptions.inJustDecodeBounds = true;
+        onlyBoundsOptions.inDither=true;//optional
+        onlyBoundsOptions.inPreferredConfig=Bitmap.Config.ARGB_8888;//optional
+        BitmapFactory.decodeStream(input, null, onlyBoundsOptions);
+        input.close();
+        if ((onlyBoundsOptions.outWidth == -1) || (onlyBoundsOptions.outHeight == -1))
+            return null;
+
+        int originalSize = (onlyBoundsOptions.outHeight > onlyBoundsOptions.outWidth) ? onlyBoundsOptions.outHeight : onlyBoundsOptions.outWidth;
+
+        double ratio = (originalSize > THUMBNAIL_SIZE) ? (originalSize / THUMBNAIL_SIZE) : 1.0;
+
+        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
+        bitmapOptions.inSampleSize = getPowerOfTwoForSampleRatio(ratio);
+        bitmapOptions.inDither=true;//optional
+        bitmapOptions.inPreferredConfig=Bitmap.Config.ARGB_8888;//optional
+        input = this.getContentResolver().openInputStream(uri);
+        Bitmap bitmap = BitmapFactory.decodeStream(input, null, bitmapOptions);
+        input.close();
+        return bitmap;
+    }
+
+    private static int getPowerOfTwoForSampleRatio(double ratio){
+        int k = Integer.highestOneBit((int)Math.floor(ratio));
+        if(k==0) return 1;
+        else return k;
     }
 }
